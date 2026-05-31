@@ -1,0 +1,40 @@
+import * as React from "react"
+import { LucideIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
+  icon: LucideIcon
+  title: string
+  description?: string
+  action?: React.ReactNode
+}
+
+export function EmptyState({
+  className,
+  icon: Icon,
+  title,
+  description,
+  action,
+  ...props
+}: EmptyStateProps) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface px-6 py-12 text-center",
+        className
+      )}
+      {...props}
+    >
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground mb-4">
+        <Icon className="h-6 w-6" />
+      </div>
+      <h3 className="text-lg font-medium text-slate-900">{title}</h3>
+      {description && (
+        <p className="mt-2 max-w-sm text-sm text-slate-500">
+          {description}
+        </p>
+      )}
+      {action && <div className="mt-6">{action}</div>}
+    </div>
+  )
+}

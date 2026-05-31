@@ -1,0 +1,151 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AdminUser {
+  id                     String     @id @default(cuid())
+  email                  String     @unique
+  name                   String?
+  password               String     // Hashed
+  role                   String     @default("ADMIN") // SUPERADMIN, ADMIN, OWNER
+  
+  // Stripe integration
+  stripeCustomerId       String?    @unique
+  stripeSubscriptionId   String?
+  stripePriceId          String?
+  subscriptionStatus     String?
+
+  // Relations
+  facilities             Facility[] @relation("OwnerToFacility")
+
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
+}
+
+model Facility {
+  id                 String             @id @default(cuid())
+  name               String
+  slug               String             @unique
+  description        String             @db.Text
+  address            String
+  city               String
+  state              String
+  zipCode            String
+  latitude           Float?
+  longitude          Float?
+  phone              String?
+  website            String?
+  isVerified         Boolean            @default(false)
+
+  // Pricing & Accommodations matching mock data
+  priceMin           Int                @default(0)
+  priceMax           Int?
+  bedsCount          Int                @default(0)
+  bedsAvailable      Int                @default(0)
+  insuranceAccepted  String             @default("In-Network / Most Insurances")
+  genderSupport      String             @default("Co-Ed / All Genders Welcome")
+  sameDayAdmission   Boolean            @default(true)
+  licenseStatus      String             @default("Active State License")
+  conditionsTreated  String[]
+
+  // Stripe & Featured Status
+  isFeatured         Boolean            @default(false)
+  featuredExpiresAt  DateTime?
+  stripeProductId    String?
+
+  // Owner Link
+  ownerId            String?
+  owner              AdminUser?         @relation("OwnerToFacility", fields: [ownerId], references: [id], onDelete: SetNull)
+  
+  // Relations
+  images             FacilityImage[]
+  reviews            Review[]
+  inquiries          Inquiry[]
+  services           FacilityService[]  @relation("FacilityToService")
+  categories         FacilityCategory[] @relation("FacilityToCategory")
+
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([city, state])
+  @@index([ownerId])
+  @@index([isFeatured])
+  @@index([isVerified])
+}
+
+model FacilityImage {
+  id         String   @id @default(cuid())
+  url        String
+  altText    String?
+  isPrimary  Boolean  @default(false)
+  facilityId String
+  facility   Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([facilityId])
+}
+
+model FacilityCategory {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  slug        String     @unique
+  description String?
+  facilities  Facility[] @relation("FacilityToCategory")
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model FacilityService {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  slug        String     @unique
+  description String?
+  category    String     @default("Clinical Care") // Clinical Care, Program Services, Lifestyle Support
+  iconName    String     @default("therapy") // detox, therapy, medical, group, family, aftercare, transport, meals
+  facilities  Facility[] @relation("FacilityToService")
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int      // 1-5
+  comment     String?  @db.Text
+  authorName  String
+  authorEmail String?
+  isApproved  Boolean  @default(false)
+  facilityId  String
+  facility    Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([facilityId, isApproved])
+}
+
+model Inquiry {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String?
+  insurance   String?
+  message     String   @db.Text
+  status      String   @default("NEW") // NEW, CONTACTED, CLOSED
+  facilityId  String
+  facility    Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([facilityId, status])
+}
