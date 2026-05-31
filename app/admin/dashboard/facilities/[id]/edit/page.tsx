@@ -37,9 +37,9 @@ export default async function EditFacilityPage({ params }: { params: Promise<{ i
     website: facility.website ?? undefined,
     priceMax: facility.priceMax ?? undefined,
     ownerId: facility.ownerId ?? undefined,
-    images: facility.images.map((img) => img.url),
-    services: facility.services.map((srv) => srv.id),
-    categories: facility.categories.map((cat) => cat.id),
+    images: facility.images.map((img: { url: string }) => img.url),
+    services: facility.services.map((srv: { id: string }) => srv.id),
+    categories: facility.categories.map((cat: { id: string }) => cat.id),
   };
 
   return (
