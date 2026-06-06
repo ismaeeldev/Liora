@@ -131,7 +131,7 @@ export function Footer() {
         {/* Bottom Bar: Legal & Social */}
         <div className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-border pt-8 sm:flex-row">
           <div className="flex flex-wrap items-center justify-center gap-4 text-slate-500 sm:justify-start">
-            <span>&copy; {currentYear} Liora, Inc.</span>
+            <span>&copy; 2026 Silverbridge Group LLC</span>
             <span className="hidden sm:inline-block">•</span>
             {FOOTER_LINKS.legal.map((link, index) => (
               <React.Fragment key={link.name}>
